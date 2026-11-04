@@ -1,0 +1,23 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Born Into Opportunity: How Childhood Environment Shapes the American Dream",
+    "section": "",
+    "text": "To what extent does the socioeconomic environment someone grows up in influence their future income, financial stability, and opportunities in adulthood?\n\nUsing data from the Opportunity Atlas, we track millions of U.S. children from childhood into adulthood to test whether two children born into equally poor families (at the 25th income percentile, around $27,000/year) end up with very different financial futures depending on where they grew up.\n\n\nCode\nlibrary(tidyverse)\nlibrary(haven)\nlibrary(plotly)\n\n# Load county-level Opportunity Atlas outcomes and neighborhood characteristics\noutcomes &lt;- read_dta(\"data/county_outcomes_simple.dta\")\ncovs &lt;- read_dta(\"data/cty_covariates.dta\")\n\ncounty_data &lt;- outcomes |&gt;\n  inner_join(covs, by = c(\"state\", \"county\", \"cz\", \"czname\")) |&gt;\n  filter(!is.na(kfr_pooled_pooled_p25), !is.na(hhinc_mean2000), pooled_pooled_count &gt;= 500) |&gt;\n  mutate(\n    # Convert percentile rank (0 to 1) into 0 to 100 scale\n    adult_income_pctile = kfr_pooled_pooled_p25 * 100,\n    poverty_rate_2000 = poor_share2000 * 100\n  )"
+  },
+  {
+    "objectID": "index.html#our-main-research-question",
+    "href": "index.html#our-main-research-question",
+    "title": "Born Into Opportunity: How Childhood Environment Shapes the American Dream",
+    "section": "",
+    "text": "To what extent does the socioeconomic environment someone grows up in influence their future income, financial stability, and opportunities in adulthood?\n\nUsing data from the Opportunity Atlas, we track millions of U.S. children from childhood into adulthood to test whether two children born into equally poor families (at the 25th income percentile, around $27,000/year) end up with very different financial futures depending on where they grew up.\n\n\nCode\nlibrary(tidyverse)\nlibrary(haven)\nlibrary(plotly)\n\n# Load county-level Opportunity Atlas outcomes and neighborhood characteristics\noutcomes &lt;- read_dta(\"data/county_outcomes_simple.dta\")\ncovs &lt;- read_dta(\"data/cty_covariates.dta\")\n\ncounty_data &lt;- outcomes |&gt;\n  inner_join(covs, by = c(\"state\", \"county\", \"cz\", \"czname\")) |&gt;\n  filter(!is.na(kfr_pooled_pooled_p25), !is.na(hhinc_mean2000), pooled_pooled_count &gt;= 500) |&gt;\n  mutate(\n    # Convert percentile rank (0 to 1) into 0 to 100 scale\n    adult_income_pctile = kfr_pooled_pooled_p25 * 100,\n    poverty_rate_2000 = poor_share2000 * 100\n  )"
+  },
+  {
+    "objectID": "index.html#neighborhood-environment-does-growing-up-in-a-wealthier-area-boost-adult-earnings",
+    "href": "index.html#neighborhood-environment-does-growing-up-in-a-wealthier-area-boost-adult-earnings",
+    "title": "Born Into Opportunity: How Childhood Environment Shapes the American Dream",
+    "section": "1. Neighborhood Environment: Does Growing Up in a Wealthier Area Boost Adult Earnings?",
+    "text": "1. Neighborhood Environment: Does Growing Up in a Wealthier Area Boost Adult Earnings?\nEvery dot below represents a U.S. county. Even though all of these children started in low-income families (the 25th percentile), their average adult income percentile varies dramatically depending on their childhood county’s average household income. Hover over any point to explore a specific area!\n\n\nCode\np_neighborhood &lt;- county_data |&gt;\n  ggplot(aes(\n    x = hhinc_mean2000,\n    y = adult_income_pctile,\n    size = pooled_pooled_count,\n    color = poverty_rate_2000,\n    text = paste0(\n      \"Area: \", czname, \" (County FIPS: \", sprintf(\"%02d%03d\", state, county), \")&lt;br&gt;\",\n      \"Childhood Area Mean Income (2000): $\", scales::comma(round(hhinc_mean2000)), \"&lt;br&gt;\",\n      \"Childhood Poverty Rate: \", round(poverty_rate_2000, 1), \"%&lt;br&gt;\",\n      \"Child's Avg Adult Income Rank: \", round(adult_income_pctile, 1), \"th percentile\"\n    )\n  )) +\n  geom_point(alpha = 0.65) +\n  geom_smooth(aes(weight = pooled_pooled_count), method = \"lm\", se = FALSE, color = \"black\", linewidth = 0.8) +\n  scale_x_continuous(labels = scales::label_dollar()) +\n  scale_color_viridis_c(option = \"plasma\", direction = -1, name = \"Poverty %\") +\n  labs(\n    title = \"Childhood Community Income vs. Adult Earnings Rank\",\n    x = \"Mean Household Income in Childhood County (2000)\",\n    y = \"Child's Adult Income Percentile (Born at 25th Percentile)\"\n  ) +\n  theme_minimal()\n\nggplotly(p_neighborhood, tooltip = \"text\")"
+  }
+]
